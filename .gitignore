@@ -1,0 +1,61 @@
+# Unity .gitignore - Mobil (Android/iOS) için optimize
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Uu]ser[Ss]ettings/
+[Mm]emoryCaptures/
+
+# Auto generated
+*.csproj
+*.unityproj
+*.sln
+*.suo
+*.tmp
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+
+# Unity cache
+*.pidb.meta
+*.pdb.meta
+*.mdb.meta
+sysinfo.txt
+*.stackdump
+
+# Builds
+*.apk
+*.aab
+*.unitypackage
+*.app
+
+# Asset meta data should be tracked
+!*.meta
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# IDE
+.vs/
+.idea/
+.vscode/
+*.swp
+*~
+
+# Koza özel - local ayarlar
+/ProjectSettings/ProjectVersion.txt.bak
