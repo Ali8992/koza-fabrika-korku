@@ -32,6 +32,8 @@ public class PauseMenu : MonoBehaviour
         prt.anchorMin = prt.anchorMax = new Vector2(1, 1);
         prt.anchoredPosition = new Vector2(-90, -90);
         prt.sizeDelta = new Vector2(110, 110);
+        var pimg0 = pauseBtn.GetComponent<Image>();
+        pimg0.sprite = UiSprites.Circle();
         pauseBtn.GetComponent<Button>().onClick.AddListener(Toggle);
 
         // Ana panel (ortada)

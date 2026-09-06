@@ -24,6 +24,7 @@ public class TouchJoystick : MonoBehaviour, IPointerDownHandler, IDragHandler, I
         if (baseRt == null) baseRt = gameObject.AddComponent<RectTransform>();
         baseRt.sizeDelta = new Vector2(radius * 2, radius * 2);
         var bg = gameObject.AddComponent<Image>();
+        bg.sprite = UiSprites.Circle();
         bg.color = new Color(1f, 1f, 1f, 0.15f);
         bg.raycastTarget = true;
 
@@ -34,7 +35,8 @@ public class TouchJoystick : MonoBehaviour, IPointerDownHandler, IDragHandler, I
         knobRt.sizeDelta = new Vector2(radius, radius);
         knobRt.anchoredPosition = Vector2.zero;
         var knobImg = knob.AddComponent<Image>();
-        knobImg.color = new Color(1f, 0.3f, 0.3f, 0.5f);
+        knobImg.sprite = UiSprites.Circle();
+        knobImg.color = new Color(1f, 0.3f, 0.3f, 0.6f);
         knobImg.raycastTarget = false;
     }
 

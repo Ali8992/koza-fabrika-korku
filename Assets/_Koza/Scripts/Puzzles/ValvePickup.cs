@@ -8,9 +8,14 @@ public class ValvePickup : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
-        if (closed) return;
         if (other.GetComponent<KozaFPSController>() == null && other.GetComponent<AliKayraController>() == null)
             return;
+        CloseNow();
+    }
+
+    public void CloseNow()
+    {
+        if (closed) return;
         closed = true;
         GetComponent<Renderer>().material.color = Color.gray;
         puzzle?.CollectPart();

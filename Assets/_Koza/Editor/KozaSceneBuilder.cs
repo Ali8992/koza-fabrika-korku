@@ -270,6 +270,8 @@ public static class KozaSceneBuilder
         var scaler = canvasObj.AddComponent<CanvasScaler>();
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
         scaler.referenceResolution = new Vector2(1920, 1080);
+        // ŞART: dokunmalar UI'ya ulaşsın (yoksa joystick ölü kalır)
+        canvasObj.AddComponent<GraphicRaycaster>();
 
         var joyObj = new GameObject("TouchJoystick");
         joyObj.transform.SetParent(canvasObj.transform, false);
@@ -278,7 +280,39 @@ public static class KozaSceneBuilder
         rt.anchoredPosition = new Vector2(200, 200);
         fps.touchJoystick = joyObj.AddComponent<TouchJoystick>();
 
+        // Sağ tarafta yuvarlak aksiyon butonları: FENER + EL (etkileşim)
+        AddRoundButton(canvasObj.transform, "BtnTorch", "FENER", new Vector2(-200, 480), new Color(1f, 0.85f, 0.2f, 0.55f), () => fps.ToggleFlashlight());
+        AddRoundButton(canvasObj.transform, "BtnInteract", "EL", new Vector2(-200, 280), new Color(0.2f, 0.8f, 0.3f, 0.55f), () => fps.Interact());
+
         new GameObject("PauseMenu").AddComponent<PauseMenu>();
+    }
+
+    // Sağ altta yuvarlak aksiyon butonu
+    static void AddRoundButton(Transform parent, string name, string label, Vector2 anchoredPos, Color color, UnityEngine.Events.UnityAction onClick)
+    {
+        var go = new GameObject(name);
+        go.transform.SetParent(parent, false);
+        var rt = go.AddComponent<RectTransform>();
+        rt.anchorMin = rt.anchorMax = new Vector2(1, 0);
+        rt.anchoredPosition = anchoredPos;
+        rt.sizeDelta = new Vector2(150, 150);
+        var img = go.AddComponent<Image>();
+        img.sprite = UiSprites.Circle();
+        img.color = color;
+        var btn = go.AddComponent<Button>();
+        btn.targetGraphic = img;
+        btn.onClick.AddListener(onClick);
+        var t = new GameObject("Label");
+        t.transform.SetParent(go.transform, false);
+        var trt = t.AddComponent<RectTransform>();
+        trt.anchorMin = Vector2.zero; trt.anchorMax = Vector2.one;
+        trt.offsetMin = Vector2.zero; trt.offsetMax = Vector2.zero;
+        var txt = t.AddComponent<Text>();
+        txt.text = label;
+        txt.fontSize = 30;
+        txt.color = Color.white;
+        txt.alignment = TextAnchor.MiddleCenter;
+        txt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
     }
 
     static void MakeWall(string name, Vector3 pos, Vector3 scale)

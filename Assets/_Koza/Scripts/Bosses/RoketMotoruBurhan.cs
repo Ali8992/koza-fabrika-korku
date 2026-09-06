@@ -48,6 +48,15 @@ public class RoketMotoruBurhan : BossBase
         foreach (var r in rocketsSmall) if (r) r.SetActive(on);
     }
 
+    // Etkileşim butonuyla şalter çekilir
+    public void PullSwitch()
+    {
+        if (switchPulled) return;
+        switchPulled = true;
+        SetArmyActive(false);
+        Debug.Log("KOZA: Şalter çekildi! Robotlar ve roketler durdu, Burhan savunmasız.");
+    }
+
     public override void TakeDamage(int dmg)
     {
         // Şalter çekilmedikçe robotlar hasarı yutar

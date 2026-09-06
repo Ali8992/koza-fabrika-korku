@@ -78,4 +78,23 @@ public class KozaFPSController : MonoBehaviour
     {
         if (flashlight) flashlight.enabled = !flashlight.enabled;
     }
+
+    // Sağdaki EL butonu: yakındaki sigorta/vana/şalteri kullanır
+    public void Interact()
+    {
+        if (PauseMenu.IsPaused) return;
+        foreach (var c in Physics.OverlapSphere(transform.position, 4f))
+        {
+            var fuse = c.GetComponent<FusePickup>();
+            if (fuse != null) { fuse.CollectNow(); return; }
+            var valve = c.GetComponent<ValvePickup>();
+            if (valve != null) { valve.CloseNow(); return; }
+            if (c.gameObject.name == "Shalter")
+            {
+                var burhan = FindObjectOfType<RoketMotoruBurhan>();
+                if (burhan != null) { burhan.PullSwitch(); return; }
+            }
+        }
+        Debug.Log("KOZA: Yakında kullanılabilir bir şey yok.");
+    }
 }
