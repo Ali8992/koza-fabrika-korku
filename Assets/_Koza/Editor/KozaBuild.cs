@@ -20,6 +20,7 @@ public static class KozaBuild
     public static void FullPipeline()
     {
         KozaSetup.Configure();
+        KozaSceneBuilder.BuildAllScenes();
         BuildApk();
     }
 
@@ -30,7 +31,7 @@ public static class KozaBuild
         string outPath = System.IO.Path.Combine(Application.dataPath, "../../koza-unity.apk");
         outPath = System.IO.Path.GetFullPath(outPath);
         var report = BuildPipeline.BuildPlayer(
-            new[] { "Assets/_Koza/Scenes/Chapter1.unity" },
+            new[] { "Assets/_Koza/Scenes/Chapter0.unity", "Assets/_Koza/Scenes/Chapter1.unity", "Assets/_Koza/Scenes/Chapter3.unity" },
             outPath,
             BuildTarget.Android,
             BuildOptions.None);

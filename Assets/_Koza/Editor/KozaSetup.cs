@@ -13,6 +13,20 @@ public static class KozaSetup
         PlayerSettings.applicationIdentifier = "com.koza.horror";
         PlayerSettings.productName = "KOZA";
         PlayerSettings.companyName = "KozaFabrika";
+        // Yatay ekran (mobil korku: landscape)
+        PlayerSettings.defaultInterfaceOrientation = UIOrientation.LandscapeLeft;
+        PlayerSettings.allowedAutorotateToLandscapeLeft = true;
+        PlayerSettings.allowedAutorotateToLandscapeRight = true;
+        PlayerSettings.allowedAutorotateToPortrait = false;
+        PlayerSettings.allowedAutorotateToPortraitUpsideDown = false;
+        // Kırmızı kelebek ikon
+        var iconTex = AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/_Koza/Icon/koza-icon.png");
+        if (iconTex != null)
+        {
+            PlayerSettings.SetIconsForTargetGroup(BuildTargetGroup.Android, new[] { iconTex });
+            Debug.Log("KOZA: ikon + yatay ekran ayarlandi.");
+        }
+        else Debug.LogWarning("KOZA: ikon bulunamadı!");
         Debug.Log("KOZA: Configure tamam.");
     }
 }
