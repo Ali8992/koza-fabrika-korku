@@ -6,6 +6,23 @@ using UnityEngine.UI;
 // UGUI Canvas bir kez kurulur, sahne başına maliyet sıfırdır (kasmasın diye OnGUI yok).
 public class StoryIntro : MonoBehaviour
 {
+    [Header("Otomatik geçiş")]
+    public float autoEnterAfter = 6f; // butona gerek yok, kendi girer
+    float timer = 0f;
+    bool entering = false;
+
+    void Update()
+    {
+        if (entering) return;
+        timer += Time.deltaTime;
+        // Süre dolduysa VEYA ekrana dokunulduysa direkt gir
+        if (timer >= autoEnterAfter || Input.touchCount > 0 || Input.GetMouseButtonDown(0))
+        {
+            entering = true;
+            SceneManager.LoadScene("Chapter1");
+        }
+    }
+
     void Awake()
     {
         var canvasObj = new GameObject("StoryCanvas");
