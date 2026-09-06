@@ -31,7 +31,7 @@ public static class KozaSceneBuilder
         MakeWall("WallR", new Vector3(8, 2.5f, 0), new Vector3(1, 5, 100));
         MakeWall("WallEnd", new Vector3(0, 2.5f, 48), new Vector3(17, 5, 1));
 
-        // Tavan lambaları: titreyen floresan hissi için aralıklı kırmızımsı point light
+        // Tavan lambaları: aralıklı kırmızımsı point light (atmosfer)
         for (int i = 0; i < 5; i++)
         {
             var lamp = new GameObject($"Lamp_{i}");
@@ -42,6 +42,9 @@ public static class KozaSceneBuilder
             pl.intensity = 1.2f;
             pl.range = 14f;
         }
+        // Loş floresanlar (kırık ama çalışıyor): koridoru aydınlatır, yarısı titrer
+        for (int i = 0; i < 6; i++)
+            AddFluorescent($"Fluorescent_{i}", new Vector3(i % 2 == 0 ? -3f : 3f, 4.6f, -36 + i * 15), i % 2 == 1);
 
         // Oyuncu: Ali Kayra (kapsül + fener)
         var player = new GameObject("AliKayra");
@@ -60,9 +63,9 @@ public static class KozaSceneBuilder
         var spot = torch.AddComponent<Light>();
         spot.type = LightType.Spot;
         spot.color = Color.white;
-        spot.intensity = 3f;
-        spot.range = 25f;
-        spot.spotAngle = 55f;
+        spot.intensity = 4.5f;
+        spot.range = 38f;
+        spot.spotAngle = 80f;
         fps.flashlight = spot;
         // Joystick stub objesi (klavye yedeği)
         var joy = new GameObject("MoveJoystick");
@@ -182,7 +185,21 @@ public static class KozaSceneBuilder
         var cam = camObj.AddComponent<Camera>();
         cam.backgroundColor = Color.black;
         fps.cameraRig = camObj.transform;
+        // Geniş fener (Ch3'te yoktu, eklendi)
+        var torch3 = new GameObject("Flashlight");
+        torch3.transform.SetParent(camObj.transform);
+        torch3.transform.localPosition = new Vector3(0.3f, -0.2f, 0.3f);
+        var spot3 = torch3.AddComponent<Light>();
+        spot3.type = LightType.Spot;
+        spot3.color = Color.white;
+        spot3.intensity = 4.5f;
+        spot3.range = 38f;
+        spot3.spotAngle = 80f;
+        fps.flashlight = spot3;
         AddMobileUI(fps);
+        // Loş floresanlar: arena çevresi
+        for (int i = 0; i < 4; i++)
+            AddFluorescent($"Fluorescent3_{i}", new Vector3(-12 + i * 8, 5f, 14), i % 2 == 0);
 
         // Burhan: sandalye + şalter arkası
         var chair = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -313,6 +330,29 @@ public static class KozaSceneBuilder
         txt.color = Color.white;
         txt.alignment = TextAnchor.MiddleCenter;
         txt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+    }
+
+    // Loş floresan (kırık ama çalışıyor): tüp mesh + soğuk beyaz ışık, yarısı titrer
+    static void AddFluorescent(string name, Vector3 pos, bool flickering)
+    {
+        var tube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        tube.name = name;
+        tube.transform.position = pos;
+        tube.transform.localScale = new Vector3(2.4f, 0.15f, 0.15f);
+        tube.GetComponent<Renderer>().material.color = new Color(0.9f, 0.95f, 1f);
+        var lamp = new GameObject(name + "_Light");
+        lamp.transform.position = pos + new Vector3(0, -0.5f, 0);
+        var pl = lamp.AddComponent<Light>();
+        pl.type = LightType.Point;
+        pl.color = new Color(0.82f, 0.88f, 1f);
+        pl.intensity = 1.1f;
+        pl.range = 15f;
+        if (flickering)
+        {
+            var fl = lamp.AddComponent<FlickerLight>();
+            fl.flickerAmount = 0.4f;
+            fl.flickerSpeed = 5f;
+        }
     }
 
     static void MakeWall(string name, Vector3 pos, Vector3 scale)
