@@ -143,7 +143,12 @@ public static class KozaSceneBuilder
         pl.intensity = 2f;
         pl.range = 12f;
 
-        // Hikaye UI: StoryIntro (IMGUI, paketsiz)
+        // UI tıklamaları için EventSystem şart (yoksa buton ölü kalır)
+        var es = new GameObject("EventSystem");
+        es.AddComponent<EventSystem>();
+        es.AddComponent<StandaloneInputModule>();
+
+        // Hikaye UI: StoryIntro (UGUI Canvas)
         var storyObj = new GameObject("StoryIntro");
         storyObj.AddComponent<StoryIntro>();
 
