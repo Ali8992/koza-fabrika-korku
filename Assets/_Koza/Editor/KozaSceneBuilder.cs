@@ -1,7 +1,9 @@
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 // KOZA - Chapter1 sahnesini kodla üretir: karanlık fabrika koridoru + fener + Selim Bey
 public static class KozaSceneBuilder
@@ -62,10 +64,12 @@ public static class KozaSceneBuilder
         spot.range = 25f;
         spot.spotAngle = 55f;
         fps.flashlight = spot;
-        // Joystick stub objesi
+        // Joystick stub objesi (klavye yedeği)
         var joy = new GameObject("MoveJoystick");
         joy.transform.SetParent(player.transform);
         fps.moveJoystick = joy.AddComponent<Joystick>();
+        // Mobil UI: dokunmatik joystick + duraklatma menüsü
+        AddMobileUI(fps);
 
         // Boss kapısı (FusePuzzle çözülmeden Selim'e ulaşılmaz)
         var door = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -173,6 +177,7 @@ public static class KozaSceneBuilder
         var cam = camObj.AddComponent<Camera>();
         cam.backgroundColor = Color.black;
         fps.cameraRig = camObj.transform;
+        AddMobileUI(fps);
 
         // Burhan: sandalye + şalter arkası
         var chair = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -245,6 +250,30 @@ public static class KozaSceneBuilder
         nose.transform.localScale = new Vector3(1, 0.8f, 1);
         nose.GetComponent<Renderer>().material.color = Color.white;
         return rocket;
+    }
+
+    // Mobil UI: EventSystem + sol altta joystick + sağ üst duraklatma
+    static void AddMobileUI(KozaFPSController fps)
+    {
+        var es = new GameObject("EventSystem");
+        es.AddComponent<EventSystem>();
+        es.AddComponent<StandaloneInputModule>();
+
+        var canvasObj = new GameObject("MobileCanvas");
+        var canvas = canvasObj.AddComponent<Canvas>();
+        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        var scaler = canvasObj.AddComponent<CanvasScaler>();
+        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        scaler.referenceResolution = new Vector2(1920, 1080);
+
+        var joyObj = new GameObject("TouchJoystick");
+        joyObj.transform.SetParent(canvasObj.transform, false);
+        var rt = joyObj.AddComponent<RectTransform>();
+        rt.anchorMin = rt.anchorMax = Vector2.zero;
+        rt.anchoredPosition = new Vector2(200, 200);
+        fps.touchJoystick = joyObj.AddComponent<TouchJoystick>();
+
+        new GameObject("PauseMenu").AddComponent<PauseMenu>();
     }
 
     static void MakeWall(string name, Vector3 pos, Vector3 scale)
