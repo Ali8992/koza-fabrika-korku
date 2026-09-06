@@ -1,46 +1,56 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 // Chapter0: Ali Kayra'nın fabrikaya girişi - hikaye ekranı + FABRİKAYA GİR butonu
-// (UGUI paketsiz: yerleşik IMGUI ile çizilir)
+// UGUI Canvas bir kez kurulur, sahne başına maliyet sıfırdır (kasmasın diye OnGUI yok).
 public class StoryIntro : MonoBehaviour
 {
-    GUIStyle titleStyle;
-    GUIStyle storyStyle;
-    GUIStyle buttonStyle;
-    bool stylesReady = false;
-
-    void MakeStyles()
+    void Awake()
     {
-        titleStyle = new GUIStyle(GUI.skin.label);
-        titleStyle.fontSize = 64;
-        titleStyle.alignment = TextAnchor.MiddleCenter;
-        titleStyle.normal.textColor = Color.white;
-        titleStyle.fontStyle = FontStyle.Bold;
+        var canvasObj = new GameObject("StoryCanvas");
+        var canvas = canvasObj.AddComponent<Canvas>();
+        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        canvasObj.AddComponent<CanvasScaler>().uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        canvasObj.AddComponent<GraphicRaycaster>();
 
-        storyStyle = new GUIStyle(GUI.skin.label);
-        storyStyle.fontSize = 26;
-        storyStyle.alignment = TextAnchor.MiddleCenter;
-        storyStyle.normal.textColor = new Color(0.85f, 0.85f, 0.85f);
-        storyStyle.wordWrap = true;
+        var title = NewText("Title", canvasObj.transform, "KOZA FABRİKASI", 64, Color.white);
+        title.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, 220);
 
-        buttonStyle = new GUIStyle(GUI.skin.button);
-        buttonStyle.fontSize = 34;
-        buttonStyle.normal.textColor = Color.white;
-        stylesReady = true;
-    }
-
-    void OnGUI()
-    {
-        if (!stylesReady) MakeStyles();
-        float w = Screen.width, h = Screen.height;
-        GUI.Label(new Rect(0, h * 0.08f, w, 100), "KOZA FABRİKASI", titleStyle);
-        GUI.Label(new Rect(w * 0.1f, h * 0.28f, w * 0.8f, h * 0.35f),
+        var story = NewText("Story", canvasObj.transform,
             "Gece yarısı. Yağmur yağıyor.\n\nAli Kayra, Koza Fabrikası'nın paslı kapısında duruyor. " +
             "İçeriden makine sesleri ve fısıltılar geliyor. Görevi belli: 5 mini-boss'u geçip " +
             "en derinde bekleyen Prof. Ekrem ile yüzleşmek.\n\nEl fenerini yakıyor... içeri giriyor.",
-            storyStyle);
-        if (GUI.Button(new Rect(w / 2 - 250, h * 0.78f, 500, 90), "FABRİKAYA GİR", buttonStyle))
-            SceneManager.LoadScene("Chapter1");
+            30, new Color(0.85f, 0.85f, 0.85f));
+        var storyRt = story.GetComponent<RectTransform>();
+        storyRt.sizeDelta = new Vector2(1500, 500);
+        storyRt.anchoredPosition = new Vector2(0, -20);
+
+        var btnObj = new GameObject("EnterButton");
+        btnObj.transform.SetParent(canvasObj.transform);
+        var btnRt = btnObj.AddComponent<RectTransform>();
+        btnRt.anchoredPosition = new Vector2(0, -330);
+        btnRt.sizeDelta = new Vector2(560, 110);
+        var btnImg = btnObj.AddComponent<Image>();
+        btnImg.color = new Color(0.6f, 0.1f, 0.1f);
+        var btn = btnObj.AddComponent<Button>();
+        btn.targetGraphic = btnImg;
+        var label = NewText("Label", btnObj.transform, "FABRİKAYA GİR", 36, Color.white);
+        label.GetComponent<RectTransform>().sizeDelta = new Vector2(560, 110);
+        btn.onClick.AddListener(() => SceneManager.LoadScene("Chapter1"));
+    }
+
+    static Text NewText(string name, Transform parent, string content, int size, Color color)
+    {
+        var go = new GameObject(name);
+        go.transform.SetParent(parent, false);
+        go.AddComponent<RectTransform>().sizeDelta = new Vector2(1500, 200);
+        var t = go.AddComponent<Text>();
+        t.text = content;
+        t.fontSize = size;
+        t.color = color;
+        t.alignment = TextAnchor.MiddleCenter;
+        t.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        return t;
     }
 }
