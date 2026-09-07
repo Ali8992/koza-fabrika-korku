@@ -374,9 +374,8 @@ public static class KozaSceneBuilder
         var img = go.AddComponent<Image>();
         img.sprite = UiSprites.Circle();
         img.color = color;
-        var btn = go.AddComponent<Button>();
-        btn.targetGraphic = img;
-        btn.onClick.AddListener(onClick);
+        // Bas-çalış: Button değil PressButton (parmak kayınca iptal olmaz)
+        go.AddComponent<PressButton>().onPress = onClick;
         var t = new GameObject("Label");
         t.transform.SetParent(go.transform, false);
         var trt = t.AddComponent<RectTransform>();

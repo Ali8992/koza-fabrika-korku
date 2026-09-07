@@ -50,11 +50,13 @@ public class StoryIntro : MonoBehaviour
         btnRt.sizeDelta = new Vector2(560, 110);
         var btnImg = btnObj.AddComponent<Image>();
         btnImg.color = new Color(0.6f, 0.1f, 0.1f);
-        var btn = btnObj.AddComponent<Button>();
-        btn.targetGraphic = btnImg;
         var label = NewText("Label", btnObj.transform, "FABRİKAYA GİR", 36, Color.white);
         label.GetComponent<RectTransform>().sizeDelta = new Vector2(560, 110);
-        btn.onClick.AddListener(() => SceneManager.LoadScene("Chapter1"));
+        btnObj.AddComponent<PressButton>().onPress = () => SceneManager.LoadScene("Chapter1");
+
+        // Sürüm etiketi (eski APK karışmasın diye)
+        var ver = NewText("Version", canvasObj.transform, "SÜRÜM " + Application.version, 24, Color.gray);
+        ver.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, -520);
     }
 
     static Text NewText(string name, Transform parent, string content, int size, Color color)

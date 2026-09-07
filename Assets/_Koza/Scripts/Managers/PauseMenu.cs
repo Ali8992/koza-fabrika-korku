@@ -35,7 +35,7 @@ public class PauseMenu : MonoBehaviour
         prt.sizeDelta = new Vector2(110, 110);
         var pimg0 = pauseBtn.GetComponent<Image>();
         pimg0.sprite = UiSprites.Circle();
-        pauseBtn.GetComponent<Button>().onClick.AddListener(Toggle);
+        pauseBtn.GetComponent<PressButton>().onPress += (Toggle);
 
         // Ana panel (ortada)
         panel = new GameObject("Panel");
@@ -48,15 +48,15 @@ public class PauseMenu : MonoBehaviour
 
         var resume = NewButton("Resume", panel.transform, "DEVAM ET", 34, Color.white, new Color(0.15f, 0.5f, 0.15f));
         Place(resume, new Vector2(0, 180));
-        resume.GetComponent<Button>().onClick.AddListener(Toggle);
+        resume.GetComponent<PressButton>().onPress += (Toggle);
 
         var settings = NewButton("Settings", panel.transform, "AYARLAR", 34, Color.white, new Color(0.2f, 0.2f, 0.5f));
         Place(settings, new Vector2(0, 40));
-        settings.GetComponent<Button>().onClick.AddListener(() => settingsPanel.SetActive(!settingsPanel.activeSelf));
+        settings.GetComponent<PressButton>().onPress += (() => settingsPanel.SetActive(!settingsPanel.activeSelf));
 
         var restart = NewButton("Restart", panel.transform, "YENİDEN BAŞLAT", 34, Color.white, new Color(0.6f, 0.4f, 0.1f));
         Place(restart, new Vector2(0, -100));
-        restart.GetComponent<Button>().onClick.AddListener(() =>
+        restart.GetComponent<PressButton>().onPress += (() =>
         {
             Time.timeScale = 1f;
             IsPaused = false;
@@ -65,7 +65,7 @@ public class PauseMenu : MonoBehaviour
 
         var quit = NewButton("Quit", panel.transform, "OYUNDAN ÇIK", 34, Color.white, new Color(0.6f, 0.1f, 0.1f));
         Place(quit, new Vector2(0, -240));
-        quit.GetComponent<Button>().onClick.AddListener(() => Application.Quit());
+        quit.GetComponent<PressButton>().onPress += (() => Application.Quit());
 
         // Ayarlar alt paneli: hassasiyet + fener
         settingsPanel = new GameObject("SettingsPanel");
@@ -93,7 +93,7 @@ public class PauseMenu : MonoBehaviour
         var torch = NewButton("Torch", settingsPanel.transform, "FENER AÇ/KAPA", 24, Color.white, new Color(0.3f, 0.3f, 0.1f));
         torch.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, -80);
         torch.GetComponent<RectTransform>().sizeDelta = new Vector2(340, 80);
-        torch.GetComponent<Button>().onClick.AddListener(() => { if (player) player.ToggleFlashlight(); });
+        torch.GetComponent<PressButton>().onPress += (() => { if (player) player.ToggleFlashlight(); });
 
         settingsPanel.SetActive(false);
         panel.SetActive(false);
@@ -121,8 +121,8 @@ public class PauseMenu : MonoBehaviour
         go.AddComponent<RectTransform>();
         var img = go.AddComponent<Image>();
         img.color = bg;
-        var btn = go.AddComponent<Button>();
-        btn.targetGraphic = img;
+        // Button yerine PressButton (mobilde bas-çalış)
+        var btn = go.AddComponent<PressButton>();
         var t = new GameObject("Label");
         t.transform.SetParent(go.transform, false);
         var trt = t.AddComponent<RectTransform>();

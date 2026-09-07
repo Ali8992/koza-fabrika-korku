@@ -13,6 +13,8 @@ public static class KozaSetup
         PlayerSettings.applicationIdentifier = "com.koza.horror";
         PlayerSettings.productName = "KOZA";
         PlayerSettings.companyName = "KozaFabrika";
+        PlayerSettings.bundleVersion = "1.13";
+        PlayerSettings.Android.bundleVersionCode = 13;
         // Yatay ekran (mobil korku: landscape)
         PlayerSettings.defaultInterfaceOrientation = UIOrientation.LandscapeLeft;
         PlayerSettings.allowedAutorotateToLandscapeLeft = true;
