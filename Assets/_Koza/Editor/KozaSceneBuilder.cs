@@ -317,9 +317,10 @@ public static class KozaSceneBuilder
         rt.anchoredPosition = new Vector2(200, 200);
         fps.touchJoystick = joyObj.AddComponent<TouchJoystick>();
 
-        // Sağ tarafta yuvarlak aksiyon butonları: FENER + EL (etkileşim)
-        AddRoundButton(canvasObj.transform, "BtnTorch", "FENER", new Vector2(-200, 480), new Color(1f, 0.85f, 0.2f, 0.55f), () => fps.ToggleFlashlight());
-        AddRoundButton(canvasObj.transform, "BtnInteract", "EL", new Vector2(-200, 280), new Color(0.2f, 0.8f, 0.3f, 0.55f), () => fps.Interact());
+        // Sağ tarafta yuvarlak aksiyon butonları: FENER + EL (etkileşim) + ZIPLA
+        AddRoundButton(canvasObj.transform, "BtnTorch", "FENER", new Vector2(-200, 500), new Color(1f, 0.85f, 0.2f, 0.55f), () => fps.ToggleFlashlight());
+        AddRoundButton(canvasObj.transform, "BtnInteract", "EL", new Vector2(-200, 300), new Color(0.2f, 0.8f, 0.3f, 0.55f), () => fps.Interact());
+        AddRoundButton(canvasObj.transform, "BtnJump", "ZIPLA", new Vector2(-420, 300), new Color(0.3f, 0.5f, 1f, 0.55f), () => fps.QueueJump());
 
         new GameObject("PauseMenu").AddComponent<PauseMenu>();
     }
@@ -387,6 +388,7 @@ public static class KozaSceneBuilder
         txt.color = Color.white;
         txt.alignment = TextAnchor.MiddleCenter;
         txt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        txt.raycastTarget = false; // yazı tıklamayı yutmasın
     }
 
     // Loş floresan (kırık ama çalışıyor): tüp mesh + soğuk beyaz ışık, yarısı titrer

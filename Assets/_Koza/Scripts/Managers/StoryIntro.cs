@@ -68,6 +68,7 @@ public class StoryIntro : MonoBehaviour
         t.color = color;
         t.alignment = TextAnchor.MiddleCenter;
         t.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        t.raycastTarget = false;
         return t;
     }
 }

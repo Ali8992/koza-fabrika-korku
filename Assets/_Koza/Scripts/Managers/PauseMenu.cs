@@ -25,6 +25,7 @@ public class PauseMenu : MonoBehaviour
         var scaler = canvasObj.AddComponent<CanvasScaler>();
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
         scaler.referenceResolution = new Vector2(1920, 1080);
+        canvasObj.AddComponent<GraphicRaycaster>(); // ŞART: butonlar dokunmatikle çalışsın
 
         // Sağ üst duraklatma butonu
         var pauseBtn = NewButton("PauseBtn", canvasObj.transform, "II", 40, Color.white, new Color(0, 0, 0, 0.5f));
@@ -133,6 +134,7 @@ public class PauseMenu : MonoBehaviour
         txt.color = tc;
         txt.alignment = TextAnchor.MiddleCenter;
         txt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        txt.raycastTarget = false; // ŞART: yazı tıklamayı yutmasın, butona geçsin
         return go;
     }
 

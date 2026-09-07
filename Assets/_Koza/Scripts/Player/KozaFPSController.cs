@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 // KOZA 3D - Mobil FPS kontrol: sol dokunmatik joystick + sağ yarıda sürükleyerek kamera
 // Kamera yumuşatmalı (sarsıntısız), fener 3 kademeli (beyaz / morötesi / kapalı)
@@ -23,6 +24,18 @@ public class KozaFPSController : MonoBehaviour
     CharacterController cc;
     float yaw, pitch, targetYaw, targetPitch;
     int lookFingerId = -1;
+
+    [Header("Zıplama")]
+    public float jumpForce = 5f;
+    public float gravity = 15f;
+    float verticalVel = 0f;
+    bool jumpQueued = false;
+
+    public void QueueJump()
+    {
+        if (PauseMenu.IsPaused) return;
+        if (cc != null && cc.isGrounded) jumpQueued = true;
+    }
 
     void Start()
     {
@@ -54,13 +67,23 @@ public class KozaFPSController : MonoBehaviour
             v = Input.GetAxis("Vertical");
         }
 
-        Vector3 move = (transform.forward * v + transform.right * h);
-        cc.SimpleMove(move.normalized * walkSpeed);
+        Vector3 move = (transform.forward * v + transform.right * h).normalized * walkSpeed;
+
+        // Zıplama + yerçekimi (SimpleMove yerine Move: zıplama şart)
+        if (cc.isGrounded)
+            verticalVel = jumpQueued ? jumpForce : -1f;
+        else
+            verticalVel -= gravity * Time.deltaTime;
+        jumpQueued = false;
+        move.y = verticalVel;
+        cc.Move(move * Time.deltaTime);
 
         // Kamera hedefi: ekranın sağ yarısında sürükle (dokunmatik) veya sağ tık (editör)
+        // UI butonuna basılan parmak kamerayı oynatmaz (sapıtma çözümü)
         foreach (var t in Input.touches)
         {
-            if (t.phase == TouchPhase.Began && lookFingerId == -1 && t.position.x > Screen.width * 0.4f)
+            if (t.phase == TouchPhase.Began && lookFingerId == -1 && t.position.x > Screen.width * 0.4f
+                && (EventSystem.current == null || !EventSystem.current.IsPointerOverGameObject(t.fingerId)))
                 lookFingerId = t.fingerId;
             else if (t.fingerId == lookFingerId && t.phase == TouchPhase.Moved)
                 AddLook(t.deltaPosition.x * 0.09f, t.deltaPosition.y * 0.09f);
