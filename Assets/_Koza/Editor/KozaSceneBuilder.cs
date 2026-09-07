@@ -13,38 +13,50 @@ public static class KozaSceneBuilder
         var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
         scene.name = "Chapter1";
 
-        // Atmosfer: gece + sis
-        RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Skybox;
+        // Atmosfer: loş ama görülebilir fabrika (zifiri karanlık yok) + sis
+        RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Flat;
+        RenderSettings.ambientLight = new Color(0.34f, 0.34f, 0.42f);
         RenderSettings.fog = true;
         RenderSettings.fogColor = Color.black;
-        RenderSettings.fogDensity = 0.06f;
+        RenderSettings.fogDensity = 0.035f;
         RenderSettings.skybox = null;
 
-        // Zemin (fabrika betonu)
+        // Zemin (fabrika betonu) - uzatıldı
         var floor = GameObject.CreatePrimitive(PrimitiveType.Plane);
         floor.name = "Floor";
-        floor.transform.localScale = new Vector3(3, 1, 10);
-        floor.GetComponent<Renderer>().material.color = new Color(0.12f, 0.12f, 0.12f);
+        floor.transform.localScale = new Vector3(3, 1, 18);
+        floor.GetComponent<Renderer>().material.color = new Color(0.16f, 0.16f, 0.17f);
 
-        // Duvarlar (koridor)
-        MakeWall("WallL", new Vector3(-8, 2.5f, 0), new Vector3(1, 5, 100));
-        MakeWall("WallR", new Vector3(8, 2.5f, 0), new Vector3(1, 5, 100));
-        MakeWall("WallEnd", new Vector3(0, 2.5f, 48), new Vector3(17, 5, 1));
+        // Duvarlar (uzun koridor) - yan odalara kapı boşluklu
+        MakeWall("WallL1", new Vector3(-8, 2.5f, -31.5f), new Vector3(1, 5, 97));
+        MakeWall("WallL2", new Vector3(-8, 2.5f, 61.5f), new Vector3(1, 5, 77));
+        MakeWall("WallR1", new Vector3(8, 2.5f, -14), new Vector3(1, 5, 132));
+        MakeWall("WallR2", new Vector3(8, 2.5f, 79), new Vector3(1, 5, 42));
+        MakeWall("WallEnd", new Vector3(0, 2.5f, 88), new Vector3(17, 5, 1));
+        // Kolonlar (harita devamı hissi)
+        for (int i = 0; i < 6; i++)
+        {
+            MakeWall($"PillarL_{i}", new Vector3(-6, 2.5f, -20 + i * 20), new Vector3(1.2f, 5, 1.2f));
+            MakeWall($"PillarR_{i}", new Vector3(6, 2.5f, -20 + i * 20), new Vector3(1.2f, 5, 1.2f));
+        }
+        // Yan odalar (keşif alanı)
+        MakeRoom("RoomL", -14, 20);
+        MakeRoom("RoomR", 14, 55);
 
         // Tavan lambaları: aralıklı kırmızımsı point light (atmosfer)
-        for (int i = 0; i < 5; i++)
+        for (int i = 0; i < 8; i++)
         {
             var lamp = new GameObject($"Lamp_{i}");
-            lamp.transform.position = new Vector3(0, 4.4f, -30 + i * 18);
+            lamp.transform.position = new Vector3(0, 4.4f, -36 + i * 16);
             var pl = lamp.AddComponent<Light>();
             pl.type = LightType.Point;
             pl.color = new Color(1f, 0.25f, 0.2f, 1f);
             pl.intensity = 1.2f;
             pl.range = 14f;
         }
-        // Loş floresanlar (kırık ama çalışıyor): koridoru aydınlatır, yarısı titrer
-        for (int i = 0; i < 6; i++)
-            AddFluorescent($"Fluorescent_{i}", new Vector3(i % 2 == 0 ? -3f : 3f, 4.6f, -36 + i * 15), i % 2 == 1);
+        // Loş floresanlar (kırık ama çalışıyor): koridoru aydınlatır, üçte biri titrer
+        for (int i = 0; i < 9; i++)
+            AddFluorescent($"Fluorescent_{i}", new Vector3(i % 2 == 0 ? -3f : 3f, 4.6f, -40 + i * 14), i % 3 == 1);
 
         // Oyuncu: Ali Kayra (kapsül + fener)
         var player = new GameObject("AliKayra");
@@ -67,6 +79,7 @@ public static class KozaSceneBuilder
         spot.range = 38f;
         spot.spotAngle = 80f;
         fps.flashlight = spot;
+        AddBlockyHands(camObj.transform);
         // Joystick stub objesi (klavye yedeği)
         var joy = new GameObject("MoveJoystick");
         joy.transform.SetParent(player.transform);
@@ -77,17 +90,17 @@ public static class KozaSceneBuilder
         // Boss kapısı (FusePuzzle çözülmeden Selim'e ulaşılmaz)
         var door = GameObject.CreatePrimitive(PrimitiveType.Cube);
         door.name = "BossDoor";
-        door.transform.position = new Vector3(0, 2.5f, 30);
+        door.transform.position = new Vector3(0, 2.5f, 60);
         door.transform.localScale = new Vector3(16, 5, 1);
         door.GetComponent<Renderer>().material.color = new Color(0.35f, 0.08f, 0.08f);
         var fuse = new GameObject("FusePuzzle").AddComponent<FusePuzzle>();
         fuse.bossDoor = door;
-        // 3 sigorta (sarı küpler)
+        // 3 sigorta (sarı küpler) - uzatılmış hatta dağılmış
         for (int i = 0; i < 3; i++)
         {
             var f = GameObject.CreatePrimitive(PrimitiveType.Cube);
             f.name = $"Fuse_{i}";
-            f.transform.position = new Vector3(-5 + i * 5, 1f, -20 + i * 8);
+            f.transform.position = new Vector3(i % 2 == 0 ? -5f : 5f, 1f, -30 + i * 16);
             f.transform.localScale = Vector3.one * 0.5f;
             f.GetComponent<Renderer>().material.color = Color.yellow;
             f.GetComponent<BoxCollider>().isTrigger = true;
@@ -97,7 +110,7 @@ public static class KozaSceneBuilder
         // Boss: Selim Bey (koridor sonu)
         var selim = GameObject.CreatePrimitive(PrimitiveType.Capsule);
         selim.name = "SelimBey";
-        selim.transform.position = new Vector3(0, 1, 40);
+        selim.transform.position = new Vector3(0, 1, 80);
         selim.GetComponent<Renderer>().material.color = Color.gray;
         selim.AddComponent<SelimBey>();
 
@@ -164,15 +177,21 @@ public static class KozaSceneBuilder
     {
         var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
         scene.name = "Chapter3";
+        RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Flat;
+        RenderSettings.ambientLight = new Color(0.34f, 0.34f, 0.42f);
         RenderSettings.fog = true;
         RenderSettings.fogColor = Color.black;
-        RenderSettings.fogDensity = 0.05f;
+        RenderSettings.fogDensity = 0.03f;
 
         var floor = GameObject.CreatePrimitive(PrimitiveType.Plane);
         floor.name = "Floor";
         floor.transform.localScale = new Vector3(4, 1, 6);
         floor.GetComponent<Renderer>().material.color = new Color(0.1f, 0.1f, 0.12f);
         MakeWall("WallBack", new Vector3(0, 2.5f, 28), new Vector3(40, 5, 1));
+        MakeWall("Pillar3_1", new Vector3(-14, 2.5f, 0), new Vector3(1.5f, 5, 1.5f));
+        MakeWall("Pillar3_2", new Vector3(14, 2.5f, 0), new Vector3(1.5f, 5, 1.5f));
+        MakeWall("Pillar3_3", new Vector3(-14, 2.5f, 20), new Vector3(1.5f, 5, 1.5f));
+        MakeWall("Pillar3_4", new Vector3(14, 2.5f, 20), new Vector3(1.5f, 5, 1.5f));
 
         // Oyuncu
         var player = new GameObject("AliKayra");
@@ -196,6 +215,7 @@ public static class KozaSceneBuilder
         spot3.range = 38f;
         spot3.spotAngle = 80f;
         fps.flashlight = spot3;
+        AddBlockyHands(camObj.transform);
         AddMobileUI(fps);
         // Loş floresanlar: arena çevresi
         for (int i = 0; i < 4; i++)
@@ -302,6 +322,43 @@ public static class KozaSceneBuilder
         AddRoundButton(canvasObj.transform, "BtnInteract", "EL", new Vector2(-200, 280), new Color(0.2f, 0.8f, 0.3f, 0.55f), () => fps.Interact());
 
         new GameObject("PauseMenu").AddComponent<PauseMenu>();
+    }
+
+    // Minecraft tarzı bloklu eller (kameraya sabit)
+    static void AddBlockyHands(Transform camRig)
+    {
+        AddHand(camRig, "HandL", -0.38f);
+        AddHand(camRig, "HandR", 0.38f);
+    }
+
+    static void AddHand(Transform camRig, string name, float x)
+    {
+        var hand = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        hand.name = name;
+        hand.transform.SetParent(camRig, false);
+        hand.transform.localPosition = new Vector3(x, -0.42f, 0.7f);
+        hand.transform.localScale = new Vector3(0.22f, 0.22f, 0.5f);
+        hand.GetComponent<Renderer>().material.color = new Color(0.87f, 0.66f, 0.5f); // ten
+        var sleeve = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        sleeve.name = name + "_Sleeve";
+        sleeve.transform.SetParent(camRig, false);
+        sleeve.transform.localPosition = new Vector3(x, -0.42f, 0.35f);
+        sleeve.transform.localScale = new Vector3(0.26f, 0.26f, 0.3f);
+        sleeve.GetComponent<Renderer>().material.color = new Color(0.15f, 0.25f, 0.55f); // mont kolu
+    }
+
+    // Yan oda (keşif): küçük zemin + 3 duvar
+    static void MakeRoom(string name, float cx, float cz)
+    {
+        var floor = GameObject.CreatePrimitive(PrimitiveType.Plane);
+        floor.name = name + "_Floor";
+        floor.transform.position = new Vector3(cx, 0.01f, cz);
+        floor.transform.localScale = new Vector3(1.2f, 1, 1.2f);
+        floor.GetComponent<Renderer>().material.color = new Color(0.14f, 0.14f, 0.15f);
+        MakeWall(name + "_Back", new Vector3(cx, 2.5f, cz + 6), new Vector3(13, 5, 1));
+        MakeWall(name + "_L", new Vector3(cx - 6, 2.5f, cz), new Vector3(1, 5, 13));
+        MakeWall(name + "_R", new Vector3(cx + 6, 2.5f, cz), new Vector3(1, 5, 13));
+        AddFluorescent(name + "_Tube", new Vector3(cx, 4.2f, cz), true);
     }
 
     // Sağ altta yuvarlak aksiyon butonu

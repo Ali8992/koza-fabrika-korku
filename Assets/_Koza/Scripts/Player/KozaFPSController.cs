@@ -1,28 +1,35 @@
 using UnityEngine;
 
 // KOZA 3D - Mobil FPS kontrol: sol dokunmatik joystick + sağ yarıda sürükleyerek kamera
+// Kamera yumuşatmalı (sarsıntısız), fener 3 kademeli (beyaz / morötesi / kapalı)
 [RequireComponent(typeof(CharacterController))]
 public class KozaFPSController : MonoBehaviour
 {
+    public enum TorchMode { Off, White, UV }
+
     [Header("Hareket")]
     public float walkSpeed = 3.5f;
     public float runSpeed = 5.5f;
     public Joystick moveJoystick; // eski stub (klavye)
     public TouchJoystick touchJoystick; // ekrandaki joystick (öncelikli)
     public float lookSensitivity = 2f;
+    public float lookSmooth = 12f; // sarsıntı önleme
 
-    [Header("Fener (Poppy atmosferi)")]
+    [Header("Fener (3 kademe)")]
     public Light flashlight;
     public Transform cameraRig;
+    public TorchMode torchMode = TorchMode.White;
 
     CharacterController cc;
-    float yaw, pitch;
+    float yaw, pitch, targetYaw, targetPitch;
     int lookFingerId = -1;
 
     void Start()
     {
         cc = GetComponent<CharacterController>();
-        yaw = transform.eulerAngles.y;
+        yaw = targetYaw = transform.eulerAngles.y;
+        pitch = targetPitch = 0f;
+        ApplyTorch();
     }
 
     void Update()
@@ -50,33 +57,62 @@ public class KozaFPSController : MonoBehaviour
         Vector3 move = (transform.forward * v + transform.right * h);
         cc.SimpleMove(move.normalized * walkSpeed);
 
-        // Kamera: ekranın sağ yarısında sürükle (dokunmatik) veya sağ tık (editör)
+        // Kamera hedefi: ekranın sağ yarısında sürükle (dokunmatik) veya sağ tık (editör)
         foreach (var t in Input.touches)
         {
             if (t.phase == TouchPhase.Began && lookFingerId == -1 && t.position.x > Screen.width * 0.4f)
                 lookFingerId = t.fingerId;
             else if (t.fingerId == lookFingerId && t.phase == TouchPhase.Moved)
-                ApplyLook(t.deltaPosition.x * 0.12f, t.deltaPosition.y * 0.12f);
+                AddLook(t.deltaPosition.x * 0.09f, t.deltaPosition.y * 0.09f);
             else if (t.fingerId == lookFingerId && (t.phase == TouchPhase.Ended || t.phase == TouchPhase.Canceled))
                 lookFingerId = -1;
         }
         if (Input.GetMouseButton(1))
-            ApplyLook(Input.GetAxis("Mouse X") * 3f, Input.GetAxis("Mouse Y") * 3f);
-    }
+            AddLook(Input.GetAxis("Mouse X") * 2f, Input.GetAxis("Mouse Y") * 2f);
 
-    void ApplyLook(float dx, float dy)
-    {
-        if (PauseMenu.IsPaused) return;
-        yaw += dx * lookSensitivity;
-        pitch -= dy * lookSensitivity;
-        pitch = Mathf.Clamp(pitch, -60f, 60f);
+        // Yumuşatma: hedefe üstel yaklaş (sarsıntı yok)
+        float k = 1f - Mathf.Exp(-lookSmooth * Time.deltaTime);
+        yaw = Mathf.LerpAngle(yaw, targetYaw, k);
+        pitch = Mathf.Lerp(pitch, targetPitch, k);
         transform.rotation = Quaternion.Euler(0, yaw, 0);
         if (cameraRig) cameraRig.localRotation = Quaternion.Euler(pitch, 0, 0);
     }
 
+    void AddLook(float dx, float dy)
+    {
+        if (PauseMenu.IsPaused) return;
+        targetYaw += dx * lookSensitivity;
+        targetPitch = Mathf.Clamp(targetPitch - dy * lookSensitivity, -60f, 60f);
+    }
+
+    // FENER butonu: her basışta kademe değişir (beyaz -> morötesi -> kapalı)
     public void ToggleFlashlight()
     {
-        if (flashlight) flashlight.enabled = !flashlight.enabled;
+        torchMode = (TorchMode)(((int)torchMode + 1) % 3);
+        ApplyTorch();
+        Debug.Log($"KOZA Fener: {torchMode}");
+    }
+
+    void ApplyTorch()
+    {
+        if (!flashlight) return;
+        if (torchMode == TorchMode.White)
+        {
+            flashlight.enabled = true;
+            flashlight.color = Color.white;
+            flashlight.intensity = 4.5f;
+            flashlight.range = 38f;
+            flashlight.spotAngle = 80f;
+        }
+        else if (torchMode == TorchMode.UV)
+        {
+            flashlight.enabled = true;
+            flashlight.color = new Color(0.55f, 0.25f, 1f); // morötesi mor
+            flashlight.intensity = 3.5f;
+            flashlight.range = 30f;
+            flashlight.spotAngle = 70f;
+        }
+        else flashlight.enabled = false;
     }
 
     // Sağdaki EL butonu: yakındaki sigorta/vana/şalteri kullanır
